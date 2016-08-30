@@ -44,18 +44,39 @@ public class CordovaDigits extends CordovaPlugin {
 
   @Override
   public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-    Log.i(TAG, "executing action " + action);
+    Log.i(TAG, "executing action " + action + " called with options: " + args);
 
     if ("authenticate".equals(action)) {
       authenticate(callbackContext);
     } else if ("logout".equals(action)) {
       logout(callbackContext);
+    } else if (action.equals("addLog")) {
+			addLog(args, callbackContext);
+		} else if (action.equals("sendCrash")) {
+			sendCrash(args, callbackContext);
+		} else if (action.equals("sendNonFatalCrash")) {
+			sendNonFatalCrash(args, callbackContext);
+		} else if (action.equals("setUserIdentifier")) {
+			setUserIdentifier(args, callbackContext);
+		} else if (action.equals("setUserName")) {
+			setUserName(args, callbackContext);
+		} else if (action.equals("setUserEmail")) {
+			setUserEmail(args, callbackContext);
+		} else if (action.equals("setStringValueForKey")) {
+			setStringValueForKey(args, callbackContext);
+		} else if (action.equals("setIntValueForKey")) {
+			setIntValueForKey(args, callbackContext);
+		} else if (action.equals("setBoolValueForKey")) {
+			setBoolValueForKey(args, callbackContext);
+		} else if (action.equals("setFloatValueForKey")) {
+			setFloatValueForKey(args, callbackContext);
     } else {
       Log.w(TAG, "unknown action `" + action + "`");
-      return false;
-    }
+			callbackContext.error(TAG + ": Method '" + action + "' not supported.");
+			return false;
+		}
 
-    return true;
+		return true;
   }
 
   public void authenticate(final CallbackContext callbackContext) {
@@ -114,4 +135,90 @@ public class CordovaDigits extends CordovaPlugin {
     }
     return null;
   }
+
+
+  /* Crashlytics Events */
+
+	private void addLog(final JSONArray data, final CallbackContext callbackContext) {
+
+		String message = data.optString(0);
+		Crashlytics.log(message);
+		callbackContext.success();
+	}
+
+	private void sendCrash(final JSONArray data, final CallbackContext callbackContext) {
+
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				throw new RuntimeException("This is a crash");
+			}
+		});
+	}
+
+	private void sendNonFatalCrash(final JSONArray data, final CallbackContext callbackContext) {
+
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Crashlytics.logException(new Throwable(data.optString(0, "No Message Provided")));
+			}
+		});
+	}
+
+	private void setUserIdentifier(final JSONArray data, final CallbackContext callbackContext) {
+
+		String identifier = data.optString(0);
+		Crashlytics.setUserIdentifier(identifier);
+		callbackContext.success();
+	}
+
+	private void setUserName(final JSONArray data, final CallbackContext callbackContext) {
+
+		String userName = data.optString(0);
+		Crashlytics.setUserName(userName);
+		callbackContext.success();
+	}
+
+	private void setUserEmail(final JSONArray data, final CallbackContext callbackContext) {
+
+		String email = data.optString(0);
+		Crashlytics.setUserEmail(email);
+		callbackContext.success();
+	}
+
+	private void setStringValueForKey(final JSONArray data, final CallbackContext callbackContext) {
+
+		String value = data.optString(0);
+		String key = data.optString(1);
+		Crashlytics.setString(key, value);
+		callbackContext.success();
+	}
+
+	private void setIntValueForKey(final JSONArray data, final CallbackContext callbackContext) {
+
+		int value = data.optInt(0);
+		String key = data.optString(1);
+
+		Crashlytics.setInt(key, value);
+		callbackContext.success();
+	}
+
+	private void setBoolValueForKey(final JSONArray data, final CallbackContext callbackContext) {
+
+		boolean value = data.optBoolean(0);
+		String key = data.optString(1);
+
+		Crashlytics.setBool(key, value);
+		callbackContext.success();
+	}
+
+	private void setFloatValueForKey(final JSONArray data, final CallbackContext callbackContext) {
+
+		double value = data.optDouble(0);
+		String key = data.optString(1);
+
+		Crashlytics.setDouble(key, value);
+		callbackContext.success();
+	}
 }
