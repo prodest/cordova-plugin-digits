@@ -5,6 +5,8 @@ import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaWebView;
 
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.*;
 import android.app.Activity;
 import android.util.Log;
@@ -89,34 +91,34 @@ public class CordovaDigits extends CordovaPlugin {
 			setFloatValueForKey(args, callbackContext);
 
 			/* Answers */
-    } else if (action.equals("sendPurchase")) {
-			sendPurchase(data, callbackContext);
+    	} else if (action.equals("sendPurchase")) {
+			sendPurchase(args, callbackContext);
 		} else if (action.equals("sendAddToCart")) {
-			sendAddToCart(data, callbackContext);
+			sendAddToCart(args, callbackContext);
 		} else if (action.equals("sendStartCheckout")) {
-			sendStartCheckout(data, callbackContext);
+			sendStartCheckout(args, callbackContext);
 		} else if (action.equals("sendSearch")) {
-			sendSearch(data, callbackContext);
+			sendSearch(args, callbackContext);
 		} else if (action.equals("sendShare")) {
-			sendShare(data, callbackContext);
+			sendShare(args, callbackContext);
 		} else if (action.equals("sendRatedContent")) {
-			sendRatedContent(data, callbackContext);
+			sendRatedContent(args, callbackContext);
 		} else if (action.equals("sendSignUp")) {
-			sendSignUp(data, callbackContext);
+			sendSignUp(args, callbackContext);
 		} else if (action.equals("sendLogIn")) {
-			sendLogIn(data, callbackContext);
+			sendLogIn(args, callbackContext);
 		} else if (action.equals("sendInvite")) {
-			sendInvite(data, callbackContext);
+			sendInvite(args, callbackContext);
 		} else if (action.equals("sendLevelStart")) {
-			sendLevelStart(data, callbackContext);
+			sendLevelStart(args, callbackContext);
 		} else if (action.equals("sendLevelEnd")) {
-			sendLevelEnd(data, callbackContext);
+			sendLevelEnd(args, callbackContext);
 		} else if (action.equals("sendContentView")) {
-			sendContentView(data, callbackContext);
+			sendContentView(args, callbackContext);
 		} else if (action.equals("sendCustomEvent")) {
-			sendCustomEvent(data, callbackContext);
-		} {
-      Log.w(TAG, "unknown action `" + action + "`");
+			sendCustomEvent(args, callbackContext);
+		} else {
+      		Log.w(TAG, "unknown action `" + action + "`");
 			callbackContext.error(TAG + ": Method '" + action + "' not supported.");
 			return false;
 		}
@@ -283,7 +285,7 @@ public class CordovaDigits extends CordovaPlugin {
 					evt.putCurrency(Currency.getInstance(data.optString(1)));
 				}
 				catch (Exception ex) {
-					Log.w(pluginName, "Unable to parse currency: " + ex.getMessage());
+					Log.w(TAG, "Unable to parse currency: " + ex.getMessage());
 				}
 
 				evt.putSuccess(data.optBoolean(2, true));
@@ -314,7 +316,7 @@ public class CordovaDigits extends CordovaPlugin {
 					evt.putCurrency(Currency.getInstance(data.optString(1)));
 				}
 				catch (Exception ex) {
-					Log.w(pluginName, "Unable to parse currency: " + ex.getMessage());
+					Log.w(TAG, "Unable to parse currency: " + ex.getMessage());
 				}
 
 				evt.putItemName(data.optString(2));
@@ -344,7 +346,7 @@ public class CordovaDigits extends CordovaPlugin {
 					evt.putCurrency(Currency.getInstance(data.optString(1)));
 				}
 				catch (Exception ex) {
-					Log.w(pluginName, "Unable to parse currency: " + ex.getMessage());
+					Log.w(TAG, "Unable to parse currency: " + ex.getMessage());
 				}
 
 				evt.putItemCount(data.optInt(2));
@@ -565,12 +567,12 @@ public class CordovaDigits extends CordovaPlugin {
 					evt.putCustomAttribute(key, attributes.getString(key));
 				}
 				catch (Exception e) {
-					Log.w(pluginName, "Error while populating custom attribute with key '" + key + "': " + e.getMessage());
+					Log.w(TAG, "Error while populating custom attribute with key '" + key + "': " + e.getMessage());
 				}
 			}
 		}
 		catch (Exception ex) {
-			Log.w(pluginName, "Error while populating custom attributes: " + ex.getMessage());
+			Log.w(TAG, "Error while populating custom attributes: " + ex.getMessage());
 		}
 	}
 }
