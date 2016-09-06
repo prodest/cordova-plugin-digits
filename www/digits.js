@@ -57,8 +57,65 @@ const digits = {
 
   setFloatValueForKey: function setFloatValueForKey( value, key ) {
     exec( noop, noop, 'Digits', 'setFloatValueForKey', [ value, key ] );
-  }
+  },
 
+  /* Answers */
+
+  sendPurchase: function sendPurchase( itemPrice, currency, success, itemName, itemType, itemId, attributes ) {
+    exec( noop, noop, 'Digits', 'sendPurchase', [ itemPrice, currency, success, itemName, itemType, itemId, attributes ] );
+  },
+
+  sendAddToCart: function sendAddToCart( itemPrice, currency, itemName, itemType, itemId, attributes ) {
+    exec( noop, noop, 'Digits', 'sendAddToCart', [ itemPrice, currency, itemName, itemType, itemId, attributes ] );
+  },
+
+  sendStartCheckout: function sendStartCheckout( totalPrice, currency, itemCount, attributes ) {
+    exec( noop, noop, 'Digits', 'sendStartCheckout', [ totalPrice, currency, itemCount, attributes ] );
+  },
+
+  sendSearch: function sendSearch( query, attributes ) {
+    exec( noop, noop, 'Digits', 'sendSearch', [ query, attributes ] );
+  },
+
+  sendShare: function sendShare( method, contentName, contentType, contentId, attributes ) {
+    exec( noop, noop, 'Digits', 'sendShare', [ method, contentName, contentType, contentId, attributes ] );
+  },
+
+  sendRatedContent: function sendRatedContent( rating, contentName, contentType, contentId, attributes ) {
+    exec( noop, noop, 'Digits', 'sendRatedContent', [ rating, contentName, contentType, contentId, attributes ] );
+  },
+
+  sendSignUp: function sendSignUp( method, success, attributes ) {
+    exec( noop, noop, 'Digits', 'sendSignUp', [ method, success, attributes ] );
+  },
+
+  sendLogIn: function sendLogIn( method, success, attributes ) {
+    exec( noop, noop, 'Digits', 'sendLogIn', [ method, success, attributes ] );
+  },
+
+  sendInvite: function sendInvite( method, attributes ) {
+    exec( noop, noop, 'Digits', 'sendInvite', [ method, attributes ] );
+  },
+
+  sendLevelStart: function sendLevelStart( levelName, attributes ) {
+    exec( noop, noop, 'Digits', 'sendLevelStart', [ levelName, attributes ] );
+  },
+
+  sendLevelEnd: function sendLevelEnd( levelName, score, success, attributes ) {
+    exec( noop, noop, 'Digits', 'sendLevelEnd', [ levelName, score, success, attributes ] );
+  },
+
+  sendContentView: function sendContentView( name, type, id, attributes ) {
+    exec( noop, noop, 'Digits', 'sendContentView', [ name, type, id, attributes ] );
+  },
+
+  sendScreenView: function sendScreenView( name, id, attributes ) {
+    exec( noop, noop, 'Digits', 'sendContentView', [ name, "Screen", id, attributes ] );
+  },
+
+  sendCustomEvent: function sendCustomEvent( name, attributes ) {
+    exec( noop, noop, 'Digits', 'sendCustomEvent', [ name, attributes ] );
+  }
 };
 
 module.exports = digits;

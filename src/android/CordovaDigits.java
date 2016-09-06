@@ -25,6 +25,21 @@ import io.fabric.sdk.android.Fabric;
 
 import com.digits.sdk.android.*;
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.AddToCartEvent;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.AnswersEvent;
+import com.crashlytics.android.answers.ContentViewEvent;
+import com.crashlytics.android.answers.CustomEvent;
+import com.crashlytics.android.answers.InviteEvent;
+import com.crashlytics.android.answers.LevelEndEvent;
+import com.crashlytics.android.answers.LevelStartEvent;
+import com.crashlytics.android.answers.LoginEvent;
+import com.crashlytics.android.answers.PurchaseEvent;
+import com.crashlytics.android.answers.RatingEvent;
+import com.crashlytics.android.answers.SearchEvent;
+import com.crashlytics.android.answers.ShareEvent;
+import com.crashlytics.android.answers.SignUpEvent;
+import com.crashlytics.android.answers.StartCheckoutEvent;
 
 public class CordovaDigits extends CordovaPlugin {
   volatile DigitsClient digitsClient;
@@ -39,7 +54,7 @@ public class CordovaDigits extends CordovaPlugin {
     super.initialize(cordova, webView);
 
     TwitterAuthConfig authConfig = getTwitterConfig();
-    Fabric.with(cordova.getActivity().getApplicationContext(), new Crashlytics(), new TwitterCore(authConfig), new Digits());
+    Fabric.with(cordova.getActivity().getApplicationContext(), new Crashlytics(), new Answers(), new TwitterCore(authConfig), new Digits());
   }
 
   @Override
@@ -50,6 +65,8 @@ public class CordovaDigits extends CordovaPlugin {
       authenticate(callbackContext);
     } else if ("logout".equals(action)) {
       logout(callbackContext);
+
+			/* Crashlytics */
     } else if (action.equals("addLog")) {
 			addLog(args, callbackContext);
 		} else if (action.equals("sendCrash")) {
@@ -70,7 +87,35 @@ public class CordovaDigits extends CordovaPlugin {
 			setBoolValueForKey(args, callbackContext);
 		} else if (action.equals("setFloatValueForKey")) {
 			setFloatValueForKey(args, callbackContext);
-    } else {
+
+			/* Answers */
+    } else if (action.equals("sendPurchase")) {
+			sendPurchase(data, callbackContext);
+		} else if (action.equals("sendAddToCart")) {
+			sendAddToCart(data, callbackContext);
+		} else if (action.equals("sendStartCheckout")) {
+			sendStartCheckout(data, callbackContext);
+		} else if (action.equals("sendSearch")) {
+			sendSearch(data, callbackContext);
+		} else if (action.equals("sendShare")) {
+			sendShare(data, callbackContext);
+		} else if (action.equals("sendRatedContent")) {
+			sendRatedContent(data, callbackContext);
+		} else if (action.equals("sendSignUp")) {
+			sendSignUp(data, callbackContext);
+		} else if (action.equals("sendLogIn")) {
+			sendLogIn(data, callbackContext);
+		} else if (action.equals("sendInvite")) {
+			sendInvite(data, callbackContext);
+		} else if (action.equals("sendLevelStart")) {
+			sendLevelStart(data, callbackContext);
+		} else if (action.equals("sendLevelEnd")) {
+			sendLevelEnd(data, callbackContext);
+		} else if (action.equals("sendContentView")) {
+			sendContentView(data, callbackContext);
+		} else if (action.equals("sendCustomEvent")) {
+			sendCustomEvent(data, callbackContext);
+		} {
       Log.w(TAG, "unknown action `" + action + "`");
 			callbackContext.error(TAG + ": Method '" + action + "' not supported.");
 			return false;
@@ -220,5 +265,312 @@ public class CordovaDigits extends CordovaPlugin {
 
 		Crashlytics.setDouble(key, value);
 		callbackContext.success();
+	}
+
+	/* Answers Events */
+
+	public void sendPurchase(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				PurchaseEvent evt = new PurchaseEvent();
+
+				if (!data.isNull(0)) {
+					evt.putItemPrice(new BigDecimal(data.optDouble(0, 0)));
+				}
+
+				try {
+					evt.putCurrency(Currency.getInstance(data.optString(1)));
+				}
+				catch (Exception ex) {
+					Log.w(pluginName, "Unable to parse currency: " + ex.getMessage());
+				}
+
+				evt.putSuccess(data.optBoolean(2, true));
+				evt.putItemName(data.optString(3));
+				evt.putItemType(data.optString(4));
+				evt.putItemId(data.optString(5));
+
+				if (!data.isNull(6)) {
+					populateCustomAttributes(evt, data.optJSONObject(5));
+				}
+
+				Answers.getInstance().logPurchase(evt);
+			}
+		});
+	}
+
+	public void sendAddToCart(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				AddToCartEvent evt = new AddToCartEvent();
+
+				if (!data.isNull(0)) {
+					evt.putItemPrice(new BigDecimal(data.optDouble(0, 0)));
+				}
+
+				try {
+					evt.putCurrency(Currency.getInstance(data.optString(1)));
+				}
+				catch (Exception ex) {
+					Log.w(pluginName, "Unable to parse currency: " + ex.getMessage());
+				}
+
+				evt.putItemName(data.optString(2));
+				evt.putItemType(data.optString(3));
+				evt.putItemId(data.optString(4));
+
+				if (!data.isNull(5)) {
+					populateCustomAttributes(evt, data.optJSONObject(5));
+				}
+
+				Answers.getInstance().logAddToCart(evt);
+			}
+		});
+	}
+
+	public void sendStartCheckout(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				StartCheckoutEvent evt = new StartCheckoutEvent();
+
+				if (!data.isNull(0)) {
+					evt.putTotalPrice(new BigDecimal(data.optDouble(0, 0)));
+				}
+
+				try {
+					evt.putCurrency(Currency.getInstance(data.optString(1)));
+				}
+				catch (Exception ex) {
+					Log.w(pluginName, "Unable to parse currency: " + ex.getMessage());
+				}
+
+				evt.putItemCount(data.optInt(2));
+
+				if (!data.isNull(3)) {
+					populateCustomAttributes(evt, data.optJSONObject(3));
+				}
+
+				Answers.getInstance().logStartCheckout(evt);
+			}
+		});
+	}
+
+	public void sendSearch(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				SearchEvent evt = new SearchEvent();
+
+				evt.putQuery(data.optString(0));
+
+				if (!data.isNull(1)) {
+					populateCustomAttributes(evt, data.optJSONObject(1));
+				}
+
+				Answers.getInstance().logSearch(evt);
+			}
+		});
+	}
+
+	public void sendShare(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				ShareEvent evt = new ShareEvent();
+
+				evt.putMethod(data.optString(0));
+				evt.putContentName(data.optString(1));
+				evt.putContentType(data.optString(2));
+				evt.putContentId(data.optString(3));
+
+				if (!data.isNull(4)) {
+					populateCustomAttributes(evt, data.optJSONObject(4));
+				}
+
+				Answers.getInstance().logShare(evt);
+			}
+		});
+	}
+
+	public void sendRatedContent(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				RatingEvent evt = new RatingEvent();
+
+				evt.putRating(data.optInt(0));
+				evt.putContentName(data.optString(1));
+				evt.putContentType(data.optString(2));
+				evt.putContentId(data.optString(3));
+
+				if (!data.isNull(4)) {
+					populateCustomAttributes(evt, data.optJSONObject(4));
+				}
+
+				Answers.getInstance().logRating(evt);
+			}
+		});
+	}
+
+	public void sendSignUp(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				SignUpEvent evt = new SignUpEvent();
+
+				evt.putMethod(data.optString(0, "Direct"));
+				evt.putSuccess(data.optBoolean(1, true));
+
+				if (!data.isNull(2)) {
+					populateCustomAttributes(evt, data.optJSONObject(2));
+				}
+
+				Answers.getInstance().logSignUp(evt);
+			}
+		});
+	}
+
+	public void sendLogIn(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				LoginEvent evt = new LoginEvent();
+
+				evt.putMethod(data.optString(0, "Direct"));
+				evt.putSuccess(data.optBoolean(1, true));
+
+				if (!data.isNull(2)) {
+					populateCustomAttributes(evt, data.optJSONObject(2));
+				}
+
+				Answers.getInstance().logLogin(evt);
+			}
+		});
+	}
+
+	public void sendInvite(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				InviteEvent evt = new InviteEvent();
+
+				evt.putMethod(data.optString(0, "Direct"));
+
+				if (!data.isNull(1)) {
+					populateCustomAttributes(evt, data.optJSONObject(1));
+				}
+
+				Answers.getInstance().logInvite(evt);
+			}
+		});
+	}
+
+	public void sendLevelStart(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				LevelStartEvent evt = new LevelStartEvent();
+
+				evt.putLevelName(data.optString(0));
+
+				if (!data.isNull(1)) {
+					populateCustomAttributes(evt, data.optJSONObject(1));
+				}
+
+				Answers.getInstance().logLevelStart(evt);
+			}
+		});
+	}
+
+	public void sendLevelEnd(final JSONArray data, final CallbackContext context) {
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				LevelEndEvent evt = new LevelEndEvent();
+
+				evt.putLevelName(data.optString(0));
+				evt.putScore(data.optInt(1));
+				evt.putSuccess(data.optBoolean(2, true));
+
+				if (!data.isNull(3)) {
+					populateCustomAttributes(evt, data.optJSONObject(3));
+				}
+
+				Answers.getInstance().logLevelEnd(evt);
+			}
+		});
+	}
+
+	public void sendContentView(final JSONArray data, final CallbackContext context) {
+
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				ContentViewEvent evt = new ContentViewEvent();
+
+				evt.putContentName(data.optString(0));
+				evt.putContentType(data.optString(1));
+				evt.putContentId(data.optString(2));
+
+				if (!data.isNull(3)) {
+					populateCustomAttributes(evt, data.optJSONObject(3));
+				}
+
+				Answers.getInstance().logContentView(evt);
+			}
+		});
+	}
+
+	public void sendCustomEvent(final JSONArray data, final CallbackContext context) {
+
+		this.cordova.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				CustomEvent evt = new CustomEvent(data.optString(0, "Custom Event"));
+
+				if (!data.isNull(1)) {
+					populateCustomAttributes(evt, data.optJSONObject(1));
+				}
+
+				Answers.getInstance().logCustom(evt);
+			}
+		});
+	}
+
+	/* Helpers */
+
+	/**
+	 * Helper method used to populate custom attributes of the given event with
+	 * the values propvided in the given JSON object.
+	 *
+	 * @param evt The event to populate with custom attribute key/value pairs.
+	 * @param attributes A JSON object of key/value pairs used to populate the event.
+	 */
+	private void populateCustomAttributes(AnswersEvent evt, JSONObject attributes) {
+
+		if (attributes == null || evt == null) {
+			return;
+		}
+
+		try {
+			Iterator<String> keys = attributes.keys();
+
+			while (keys.hasNext()) {
+				String key = keys.next();
+
+				try {
+					evt.putCustomAttribute(key, attributes.getString(key));
+				}
+				catch (Exception e) {
+					Log.w(pluginName, "Error while populating custom attribute with key '" + key + "': " + e.getMessage());
+				}
+			}
+		}
+		catch (Exception ex) {
+			Log.w(pluginName, "Error while populating custom attributes: " + ex.getMessage());
+		}
 	}
 }
